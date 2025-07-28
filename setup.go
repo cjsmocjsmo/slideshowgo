@@ -33,10 +33,13 @@ func img_orient(imgPath string) (string, error) {
 	}
 
 	if config.Width > config.Height {
+		Println("Landscape")
 		return "landscape", nil
 	} else if config.Width < config.Height {
+		Println("Portrait")
 		return "portrait", nil
 	} else {
+		Println("Square")
 		return "square", nil
 	}
 }
@@ -55,7 +58,6 @@ func calc_name(imgpath string) string {
 	}
 
 	return fmt.Sprintf("%x", hasher.Sum(nil))
-
 }
 
 func create_img_db_table(dpath string) {
