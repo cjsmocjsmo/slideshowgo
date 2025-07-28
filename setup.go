@@ -33,13 +33,13 @@ func img_orient(imgPath string) (string, error) {
 	}
 
 	if config.Width > config.Height {
-		Println("Landscape")
+		fmt.Println("Landscape")
 		return "landscape", nil
 	} else if config.Width < config.Height {
-		Println("Portrait")
+		fmt.Println("Portrait")
 		return "portrait", nil
 	} else {
-		Println("Square")
+		fmt.Println("Square")
 		return "square", nil
 	}
 }

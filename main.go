@@ -21,7 +21,7 @@ var templates *template.Template
 
 func init() {
 	dbpath := "/home/whitepi/go/slideshowgo/imagesDB"
-	imagedir := "/media/whitepi/ATree/"
+	imagedir := "/home/whitepi/Pictures/"
 	Walk_Img_Dir(dbpath, imagedir)
 	// Parse all templates in the "templates" directory.
 	// template.Must panics if there's an error, which is good for quick startup
