@@ -1,14 +1,16 @@
 package main
 
 import (
+	"crypto/md5"
+	"database/sql"
+	"fmt"
 	"image"
 	_ "image/jpeg"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"fmt"
 )
 
 type ImageData struct {
@@ -37,6 +39,23 @@ func img_orient(imgPath string) (string, error) {
 	} else {
 		return "square", nil
 	}
+}
+
+func calc_name(imgpath string) string {
+	file, err := os.Open(imgpath)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+
+	hasher := md5.New()
+	_, err = io.Copy(hasher, file)
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%x", hasher.Sum(nil))
+
 }
 
 func create_img_db_table(dpath string) {
@@ -84,7 +103,7 @@ func Walk_Img_Dir(dbpath string, dir string) error {
 				return orientErr
 			}
 			imageData := ImageData{
-				Name:        info.Name(),
+				Name:        calc_name(path),
 				Path:        path,
 				Idx:         idx,
 				Orientation: orientation,

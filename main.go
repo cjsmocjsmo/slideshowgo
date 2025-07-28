@@ -20,7 +20,7 @@ type TemplateData struct {
 var templates *template.Template
 
 func init() {
-	dbpath := "/media/whitepi/slideshowgo/imagesDB"
+	dbpath := "/home/whitepi/go/slideshowgo/imagesDB"
 	imagedir := "/media/whitepi/ATree/"
 	Walk_Img_Dir(dbpath, imagedir)
 	// Parse all templates in the "templates" directory.
