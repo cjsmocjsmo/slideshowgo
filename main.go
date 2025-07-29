@@ -1,12 +1,14 @@
 package main
 
 import (
+	// "database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
-	"github.com/gorilla/mux"
 )
 
 // TemplateData struct for passing data to templates
@@ -16,13 +18,20 @@ type TemplateData struct {
 	CurrentTime string
 }
 
+// type ImageData struct {
+// 	Name        string
+// 	Path        string
+// 	Http        string
+// 	Idx         int
+// 	Orientation string
+// }
+
 // Global variable to store parsed templates
 var templates *template.Template
+var dbpath = "/home/pimedia/Pictures/imagesDB"
+var imagedir = "/home/pimedia/Pictures/"
 
 func init() {
-	// dbpath := "/home/whitepi/go/slideshowgo/imagesDB"
-	// imagedir := "/home/whitepi/Pictures/"
-	// Walk_Img_Dir(dbpath, imagedir)
 	// Parse all templates in the "templates" directory.
 	// template.Must panics if there's an error, which is good for quick startup
 	// errors for templates. In a larger app, you might handle errors more gracefully.
@@ -61,7 +70,6 @@ func serveStaticFiles(router *mux.Router) {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", staticFileServer))
 }
 
-
 func main() {
 	router := mux.NewRouter()
 
@@ -73,7 +81,6 @@ func main() {
 	// If you have CSS, JS, images, etc., put them in a 'static' folder.
 	// You might create a `static` directory like `my-web-app/static/css/style.css`
 	serveStaticFiles(router)
-
 
 	port := ":8080"
 	fmt.Printf("Server starting on port %s\n", port)

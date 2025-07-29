@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; }
-        nav a { margin-right: 15px; }
+        body { 
+            font-family: sans-serif; 
+            margin: 20px; 
+        }
+        nav a { 
+            margin-right: 15px; 
+        }
+        .imgDiv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -17,5 +28,18 @@
     <h1>Welcome to the {{.PageName}} Page!</h1>
     <p>This is dynamic content from your Go server.</p>
     <p>Current Time: {{.CurrentTime}}</p>
+    <div class="imgDiv">
+        <!-- <img 
+            class="img"
+            src="{{.ImageData.Http}}"
+            alt="{{.ImageData.Name}}" 
+            style="max-width: 100%; height: auto;"
+        > -->
+        <img 
+            class="img"
+            src="http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg" 
+            style="max-width: 100%; height: auto;"
+        >
+    </div>
 </body>
 </html>
