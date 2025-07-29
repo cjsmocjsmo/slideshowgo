@@ -20,9 +20,9 @@ type TemplateData struct {
 var templates *template.Template
 
 func init() {
-	dbpath := "/home/whitepi/go/slideshowgo/imagesDB"
-	imagedir := "/home/whitepi/Pictures/"
-	Walk_Img_Dir(dbpath, imagedir)
+	// dbpath := "/home/whitepi/go/slideshowgo/imagesDB"
+	// imagedir := "/home/whitepi/Pictures/"
+	// Walk_Img_Dir(dbpath, imagedir)
 	// Parse all templates in the "templates" directory.
 	// template.Must panics if there's an error, which is good for quick startup
 	// errors for templates. In a larger app, you might handle errors more gracefully.
@@ -56,15 +56,9 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 
 // serveStaticFiles sets up a file server for static assets (like CSS, JS, images).
 func serveStaticFiles(router *mux.Router) {
-    // Create a file server for the "static" directory.
-    // Ensure you create a "static" directory in your project if you use this.
-    // Example: my-web-app/static/css/style.css
-    staticFileServer := http.FileServer(http.Dir("static"))
-
-    // Use PathPrefix to match any request starting with /static/
-    // StripPrefix removes the /static/ part from the URL path before
-    // FileServer looks for the file on disk.
-    router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", staticFileServer))
+	// Serve static files from /home/pimedia/Pictures/
+	staticFileServer := http.FileServer(http.Dir("/home/pimedia/Pictures/"))
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", staticFileServer))
 }
 
 
