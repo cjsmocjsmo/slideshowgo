@@ -19,10 +19,22 @@
             justify-content: center;
             align-items: center;
             margin-top: 20px;
+        }  
+        imgLand {
+            max-width: 1600px;
+            max-height: 903px;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
-        img {
-            max-width: 90%;
-            max-height: 90%;
+        imgPort {
+            max-width: 903px;
+            max-height: 1600px;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        imgSquare {
+            max-width: 1600px;
+            max-height: 1600px;
             border: 2px solid white;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
@@ -30,11 +42,13 @@
 </head>
 <body>
     <div class="imgDiv">
-        <img 
-            class="img"
-            src="{{.Http}}"
-            alt="{{.Name}}"
-        >
+        {{if eq .Orientation "landscape"}}
+            <img class="imgLand" src="{{.Http}}" alt="{{.Name}}">
+        {{else if eq .Orientation "portrait"}}
+            <img class="imgPort" src="{{.Http}}" alt="{{.Name}}">
+        {{else}}
+            <img class="imgSquare" src="{{.Http}}" alt="{{.Name}}">
+        {{end}}
     </div>
 </body>
 </html>
