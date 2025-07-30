@@ -58,7 +58,7 @@ func get_db_image(idx int) (ImageData, error) {
 
 	var img ImageData
 	query := "SELECT name, path, http, idx, orientation FROM images WHERE idx = ?"
-	err = db.QueryRow(query, idx).Scan(&img.Name, &img.Path, &img.Idx, &img.Orientation)
+	err = db.QueryRow(query, idx).Scan(&img.Name, &img.Path, &img.Http, &img.Idx, &img.Orientation)
 	if err != nil {
 		log.Printf("Error querying image: %v", err)
 		return ImageData{}, err
