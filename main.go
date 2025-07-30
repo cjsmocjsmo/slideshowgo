@@ -76,7 +76,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	// 	Idx:         1,
 	// 	Orientation: "landscape",
 	// }
-	data, err1 := get_db_image(12)
+	data, err1 := get_db_image(10)
 	if err1 != nil {
 		log.Printf("Error getting image from database: %v", err1)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
