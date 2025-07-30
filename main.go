@@ -34,7 +34,7 @@ func init() {
 func db_count() int {
 	db, err := sql.Open("sqlite3", dbpath)
 	if err != nil {
-		log.Printf("Error opening database: %v", err)
+		log.Printf("Error opening count database: %v", err)
 		return 0
 	}
 	defer db.Close()
@@ -60,7 +60,7 @@ func get_db_image(idx int) (ImageData, error) {
 	query := "SELECT name, path, http, idx, orientation FROM images WHERE idx = ?"
 	err = db.QueryRow(query, idx).Scan(&img.Name, &img.Path, &img.Http, &img.Idx, &img.Orientation)
 	if err != nil {
-		log.Printf("Error querying image: %v", err)
+		log.Printf("Error querying get_db_image: %v", err)
 		return ImageData{}, err
 	}
 	return img, nil
@@ -76,7 +76,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	// 	Idx:         1,
 	// 	Orientation: "landscape",
 	// }
-	data, err1 := get_db_image(1)
+	data, err1 := get_db_image(12)
 	if err1 != nil {
 		log.Printf("Error getting image from database: %v", err1)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
