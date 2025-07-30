@@ -48,6 +48,26 @@ func db_count() int {
 	return count
 }
 
+func db_get_image(idx int) (ImageData, error) {
+	db, err := sql.Open("sqlite3", dbpath)
+	if err != nil {
+		log.Printf("Error opening database: %v", err)
+		return ImageData{}, err
+	}
+	defer db.Close()
+
+	var img ImageData
+	query := "SELECT name, path, http, idx, orientation FROM images WHERE idx = ?"
+	err = db.QueryRow(query, idx).Scan(&img.Name, &img.Path, &img.Idx, &img.Orientation)
+	if err != nil {
+		log.Printf("Error querying image: %v", err)
+		return ImageData{}, err
+	}
+	return img, nil
+}
+
+var dbcount = db_count()
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := ImageData{
 		Name:        "83bcf227931a9595.jpg",
