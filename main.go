@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "database/sql"
+	"database/sql"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,6 +38,23 @@ func init() {
 	templates = template.Must(template.ParseGlob("templates/*.html"))
 }
 
+func db_count() int {
+	db, err := sql.Open("sqlite3", dbpath)
+	if err != nil {
+		log.Printf("Error opening database: %v", err)
+		return 0
+	}
+	defer db.Close()
+
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM images").Scan(&count)
+	if err != nil {
+		log.Printf("Error querying count: %v", err)
+		return 0
+	}
+	return count
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := TemplateData{
 		Title:       "Home - My Go App",
@@ -45,18 +62,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		CurrentTime: time.Now().Format("Mon Jan 2 15:04:05 MST 2006"),
 	}
 	err := templates.ExecuteTemplate(w, "index.html", data)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Error executing template: %v", err)
-	}
-}
-
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	data := TemplateData{
-		Title:    "About Us - My Go App",
-		PageName: "About",
-	}
-	err := templates.ExecuteTemplate(w, "about.html", data)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Printf("Error executing template: %v", err)
@@ -75,7 +80,6 @@ func main() {
 
 	// Register handlers for HTML templates
 	router.HandleFunc("/", homeHandler).Methods("GET")
-	router.HandleFunc("/about", aboutHandler).Methods("GET")
 
 	// Serve static files (optional, but good practice for real apps)
 	// If you have CSS, JS, images, etc., put them in a 'static' folder.
