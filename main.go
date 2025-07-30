@@ -71,7 +71,7 @@ var dbcount = db_count()
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := ImageData{
 		Name:        "83bcf227931a9595.jpg",
-		Path:        "/static/Pics1/images_part_001/83bcf227931a9595.jpg",
+		Path:        "/static/Pics1/images_part_001/IMG_20250606_143601087.jpg",
 		Http:        "http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg",
 		Idx:         1,
 		Orientation: "landscape",
