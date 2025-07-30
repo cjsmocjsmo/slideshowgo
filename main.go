@@ -48,7 +48,7 @@ func db_count() int {
 	return count
 }
 
-func db_get_image(idx int) (ImageData, error) {
+func get_db_image(idx int) (ImageData, error) {
 	db, err := sql.Open("sqlite3", dbpath)
 	if err != nil {
 		log.Printf("Error opening database: %v", err)
@@ -69,12 +69,18 @@ func db_get_image(idx int) (ImageData, error) {
 var dbcount = db_count()
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	data := ImageData{
-		Name:        "83bcf227931a9595.jpg",
-		Path:        "/static/Pics1/images_part_001/IMG_20250606_143601087.jpg",
-		Http:        "http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg",
-		Idx:         1,
-		Orientation: "landscape",
+	// data := ImageData{
+	// 	Name:        "83bcf227931a9595.jpg",
+	// 	Path:        "/static/Pics1/images_part_001/IMG_20250606_143601087.jpg",
+	// 	Http:        "http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg",
+	// 	Idx:         1,
+	// 	Orientation: "landscape",
+	// }
+	data, err1 := get_db_image(10)
+	if err1 != nil {
+		log.Printf("Error getting image from database: %v", err1)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 	err := templates.ExecuteTemplate(w, "index.html", data)
