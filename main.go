@@ -12,11 +12,11 @@ import (
 )
 
 // TemplateData struct for passing data to templates
-type TemplateData struct {
-	Title       string
-	PageName    string
-	CurrentTime string
-}
+// type TemplateData struct {
+// 	Title       string
+// 	PageName    string
+// 	CurrentTime string
+// }
 
 type ImageData struct {
 	Name        string
