@@ -3,12 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
-	// "time"
+	"sync"
+	"time"
+
+	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type ImageData struct {
@@ -23,6 +25,10 @@ type ImageData struct {
 var templates *template.Template
 var dbpath = "/home/pimedia/Pictures/imagesDB"
 var imagedir = "/home/pimedia/Pictures/"
+
+// Global variables for slideshow control
+var currentImageIdx int = 1
+var imageMutex sync.RWMutex
 
 func init() {
 	// Parse all templates in the "templates" directory.
@@ -68,15 +74,30 @@ func get_db_image(idx int) (ImageData, error) {
 
 var dbcount = db_count()
 
+// startSlideshow starts the automatic slideshow timer
+func startSlideshow() {
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			imageMutex.Lock()
+			currentImageIdx++
+			if currentImageIdx > dbcount {
+				currentImageIdx = 1
+			}
+			imageMutex.Unlock()
+			log.Printf("Slideshow advanced to image %d", currentImageIdx)
+		}
+	}()
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	// data := ImageData{
-	// 	Name:        "83bcf227931a9595.jpg",
-	// 	Path:        "/static/Pics1/images_part_001/IMG_20250606_143601087.jpg",
-	// 	Http:        "http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg",
-	// 	Idx:         1,
-	// 	Orientation: "landscape",
-	// }
-	data, err1 := get_db_image(10)
+	imageMutex.RLock()
+	idx := currentImageIdx
+	imageMutex.RUnlock()
+
+	data, err1 := get_db_image(idx)
 	if err1 != nil {
 		log.Printf("Error getting image from database: %v", err1)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -98,6 +119,9 @@ func serveStaticFiles(router *mux.Router) {
 }
 
 func main() {
+	// Start the slideshow timer
+	startSlideshow()
+
 	router := mux.NewRouter()
 
 	// Register handlers for HTML templates
