@@ -8,7 +8,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
+	// "time"
 )
 
 // TemplateData struct for passing data to templates
@@ -18,13 +18,13 @@ type TemplateData struct {
 	CurrentTime string
 }
 
-// type ImageData struct {
-// 	Name        string
-// 	Path        string
-// 	Http        string
-// 	Idx         int
-// 	Orientation string
-// }
+type ImageData struct {
+	Name        string
+	Path        string
+	Http        string
+	Idx         int
+	Orientation string
+}
 
 // Global variable to store parsed templates
 var templates *template.Template
@@ -56,11 +56,14 @@ func db_count() int {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	data := TemplateData{
-		Title:       "Home - My Go App",
-		PageName:    "Home",
-		CurrentTime: time.Now().Format("Mon Jan 2 15:04:05 MST 2006"),
+	data := ImageData{
+		Name:        "SlideShow",
+		Path:        "/static/Pics1/images_part_001/83bcf227931a9595.jpg",
+		Http:        "http://10.0.4.41:8080/static/Pics1/images_part_001/83bcf227931a9595.jpg",
+		Idx:         1,
+		Orientation: "landscape",
 	}
+
 	err := templates.ExecuteTemplate(w, "index.html", data)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
