@@ -102,15 +102,7 @@ func get_db_image(idx int) (ImageData, error) {
 		return ImageData{}, err
 	}
 	defer db.Close()
-
-	// var img ImageData
-	// query := "SELECT name, path, http, idx, orientation FROM images WHERE idx = ?"
-	// err = db.QueryRow(query, idx).Scan(&img.Name, &img.Path, &img.Http, &img.Idx, &img.Orientation)
-	// if err != nil {
-	// 	log.Printf("Error querying get_db_image: %v", err)
-	// 	return ImageData{}, err
-	// }
-	// return img, nil
+	// Prepare the query to get image data by index
 	var img ImageData
 	query := "SELECT name, http, idx, orientation FROM images WHERE idx = ?"
 	err = db.QueryRow(query, idx).Scan(&img.Name, &img.Http, &img.Idx, &img.Orientation)
