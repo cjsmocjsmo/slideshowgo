@@ -97,7 +97,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	idx := currentImageIdx
 	imageMutex.RUnlock()
 
-	fmt.Println("Current image index:", idx)
+	fmt.Println("db_count:", dbcount)
 
 	data, err1 := get_db_image(idx)
 	if err1 != nil {
