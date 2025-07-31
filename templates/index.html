@@ -39,14 +39,69 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
     </style>
+    <script>
+        // Function to try playing audio when page loads
+        function playAudio() {
+            const audio = document.getElementById('backgroundAudio');
+            const message = document.getElementById('audioMessage');
+            
+            if (audio) {
+                audio.play().then(() => {
+                    console.log('Audio started successfully');
+                    if (message) message.style.display = 'none';
+                }).catch(e => {
+                    console.log('Autoplay was prevented:', e);
+                    if (message) message.style.display = 'block';
+                });
+            }
+        }
+        
+        // Try to play audio when page loads
+        window.addEventListener('load', function() {
+            setTimeout(playAudio, 1000); // Delay to help with loading
+        });
+        
+        // Also try when user interacts with the page
+        document.addEventListener('click', function() {
+            const audio = document.getElementById('backgroundAudio');
+            const message = document.getElementById('audioMessage');
+            if (audio && audio.paused) {
+                audio.play().then(() => {
+                    if (message) message.style.display = 'none';
+                }).catch(e => console.log('Play failed:', e));
+            }
+        });
+        
+        // Handle audio errors
+        window.addEventListener('load', function() {
+            const audio = document.getElementById('backgroundAudio');
+            if (audio) {
+                audio.addEventListener('error', function(e) {
+                    console.log('Audio error:', e);
+                    const message = document.getElementById('audioMessage');
+                    if (message) {
+                        message.innerHTML = 'Audio stream unavailable. Click to retry.';
+                        message.style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- Background music from 101.5 HANK FM Seattle -->
-    <audio autoplay loop controls style="position: fixed; bottom: 10px; right: 10px; z-index: 1000;">
-        <source src="https://stream.crankthehankseattle.com/stream" type="audio/mpeg">
-        <source src="https://live.wostreaming.net/direct/trinitykplz-kplzfmaac-ibc3" type="audio/aac">
+    <audio id="backgroundAudio" autoplay loop controls style="position: fixed; bottom: 10px; right: 10px; z-index: 1000; opacity: 0.8;">
+        <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/KPLZFMAAC.aac" type="audio/aac">
+        <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/KPLZFM.mp3" type="audio/mpeg">
+        <source src="https://stream.revma.ihrhls.com/zc181" type="audio/mpeg">
+        <source src="https://ice42.securenetsystems.net/KPLZ" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+    
+    <!-- Fallback: Show message if audio doesn't work -->
+    <div id="audioMessage" style="position: fixed; bottom: 60px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; font-size: 12px; display: none;">
+        Click the audio player to start music
+    </div>
     
     <div class="imgDiv">
         {{if eq .Orientation "landscape"}}
