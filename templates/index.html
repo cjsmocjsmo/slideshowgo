@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SlideShow</title>
-    <meta http-equiv="refresh" content="60">
     <style>
         body { 
             display: flex;
@@ -40,6 +39,12 @@
         }
     </style>
     <script>
+        let currentImageData = {
+            Name: "{{.Name}}",
+            Http: "{{.Http}}",
+            Orientation: "{{.Orientation}}"
+        };
+
         // Function to try playing audio when page loads
         function playAudio() {
             const audio = document.getElementById('backgroundAudio');
@@ -55,10 +60,43 @@
                 });
             }
         }
-        
+
+        // Function to update the image without page refresh
+        function updateImage() {
+            fetch('/api/current-image')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.Http && data.Http !== currentImageData.Http) {
+                        currentImageData = data;
+                        
+                        const imgDiv = document.querySelector('.imgDiv');
+                        let imgClass = 'imgSquare'; // default
+                        
+                        if (data.Orientation === 'landscape') {
+                            imgClass = 'imgLand';
+                        } else if (data.Orientation === 'portrait') {
+                            imgClass = 'imgPort';
+                        }
+                        
+                        imgDiv.innerHTML = `<img class="${imgClass}" src="${data.Http}" alt="${data.Name}">`;
+                        console.log('Image updated:', data.Name);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                });
+        }
+
+        // Start the slideshow update cycle
+        function startSlideshow() {
+            // Update image every 60 seconds
+            setInterval(updateImage, 60000);
+        }
+
         // Try to play audio when page loads
         window.addEventListener('load', function() {
             setTimeout(playAudio, 1000); // Delay to help with loading
+            startSlideshow(); // Start the slideshow updates
         });
         
         // Also try when user interacts with the page

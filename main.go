@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -169,6 +170,28 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getCurrentImageJSON returns the current image data as JSON
+func getCurrentImageJSON(w http.ResponseWriter, r *http.Request) {
+	imageMutex.RLock()
+	idx := currentImageIdx
+	imageMutex.RUnlock()
+
+	if len(availableIndices) == 0 {
+		http.Error(w, "No images available", http.StatusInternalServerError)
+		return
+	}
+
+	data, err := get_db_image(idx)
+	if err != nil {
+		log.Printf("Error getting image from database: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
 // serveStaticFiles sets up a file server for static assets (like CSS, JS, images).
 func serveStaticFiles(router *mux.Router) {
 	// Serve static files from /home/pimedia/Pictures/
@@ -184,6 +207,9 @@ func main() {
 
 	// Register handlers for HTML templates
 	router.HandleFunc("/", homeHandler).Methods("GET")
+
+	// Add API endpoint for current image data
+	router.HandleFunc("/api/current-image", getCurrentImageJSON).Methods("GET")
 
 	// Serve static files (optional, but good practice for real apps)
 	// If you have CSS, JS, images, etc., put them in a 'static' folder.
