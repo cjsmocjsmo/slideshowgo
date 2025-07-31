@@ -29,12 +29,22 @@ var imagedir = "/home/pimedia/Pictures/"
 // Global variables for slideshow control
 var currentImageIdx int = 1
 var imageMutex sync.RWMutex
+var availableIndices []int
+
+var dbcount = db_count()
+var currentSlideIndex = 0 // Index into availableIndices array
 
 func init() {
 	// Parse all templates in the "templates" directory.
 	// template.Must panics if there's an error, which is good for quick startup
 	// errors for templates. In a larger app, you might handle errors more gracefully.
 	templates = template.Must(template.ParseGlob("templates/*.html"))
+
+	// Get available indices from database
+	availableIndices = get_available_indices()
+	if len(availableIndices) > 0 {
+		currentImageIdx = availableIndices[0] // Start with first available index
+	}
 }
 
 func db_count() int {
@@ -52,6 +62,36 @@ func db_count() int {
 		return 0
 	}
 	return count
+}
+
+func get_available_indices() []int {
+	db, err := sql.Open("sqlite3", dbpath)
+	if err != nil {
+		log.Printf("Error opening database for indices: %v", err)
+		return []int{}
+	}
+	defer db.Close()
+
+	query := "SELECT idx FROM images ORDER BY idx"
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Printf("Error querying indices: %v", err)
+		return []int{}
+	}
+	defer rows.Close()
+
+	var indices []int
+	for rows.Next() {
+		var idx int
+		if err := rows.Scan(&idx); err != nil {
+			log.Printf("Error scanning index: %v", err)
+			continue
+		}
+		indices = append(indices, idx)
+	}
+
+	log.Printf("Available indices: %v", indices)
+	return indices
 }
 
 func get_db_image(idx int) (ImageData, error) {
@@ -80,8 +120,6 @@ func get_db_image(idx int) (ImageData, error) {
 	return img, nil
 }
 
-var dbcount = db_count()
-
 // startSlideshow starts the automatic slideshow timer
 func startSlideshow() {
 	go func() {
@@ -90,12 +128,15 @@ func startSlideshow() {
 
 		for range ticker.C {
 			imageMutex.Lock()
-			currentImageIdx++
-			if currentImageIdx > dbcount {
-				currentImageIdx = 1
+			if len(availableIndices) > 0 {
+				currentSlideIndex++
+				if currentSlideIndex >= len(availableIndices) {
+					currentSlideIndex = 0
+				}
+				currentImageIdx = availableIndices[currentSlideIndex]
+				log.Printf("Slideshow advanced to image index %d (position %d of %d)", currentImageIdx, currentSlideIndex+1, len(availableIndices))
 			}
 			imageMutex.Unlock()
-			log.Printf("Slideshow advanced to image %d", currentImageIdx)
 		}
 	}()
 }
@@ -105,7 +146,14 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	idx := currentImageIdx
 	imageMutex.RUnlock()
 
-	fmt.Println("db_count:", dbcount)
+	fmt.Printf("Available indices: %v, db_count: %d, current_idx: %d, slide_position: %d\n",
+		availableIndices, dbcount, idx, currentSlideIndex+1)
+
+	if len(availableIndices) == 0 {
+		log.Printf("No images available in database")
+		http.Error(w, "No images available", http.StatusInternalServerError)
+		return
+	}
 
 	data, err1 := get_db_image(idx)
 	if err1 != nil {
