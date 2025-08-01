@@ -140,7 +140,7 @@ def main():
     """
     Main function to set up the database and process images.
     """
-    db_path = "/home/pimedia/imagesDB"
+    db_path = "/home/pimedia/go/slideshowgo/imagesDB"
     image_dir = "/home/pimedia/Pictures/test/"
     
     create_img_db_table(db_path)
