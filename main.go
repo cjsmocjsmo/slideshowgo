@@ -24,7 +24,7 @@ type ImageData struct {
 
 // Global variable to store parsed templates
 var templates *template.Template
-var dbpath = "/home/pimedia/imagesDB"
+var dbpath = "/home/pimedia/go/slideshowgo/imagesDB"
 var imagedir = "/home/pimedia/Pictures/test/"
 
 // Global variables for slideshow control
