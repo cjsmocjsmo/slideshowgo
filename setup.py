@@ -4,7 +4,7 @@ import sqlite3
 import os
 from PIL import Image
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -18,7 +18,7 @@ class ImageData:
     height: int
 
 
-def img_orient(img_path: str) -> str:
+def img_orient(img_path: str) -> Tuple[int, int, str]:
     """
     Determine the orientation of an image based on its dimensions.
     Returns 'landscape', 'portrait', or 'square'.
@@ -54,7 +54,7 @@ def create_img_db_table(db_path: str) -> None:
             Path TEXT,
             Http TEXT,
             Idx INTEGER,
-            Orientation TEXT
+            Orientation TEXT,
             Width INTEGER,
             Height INTEGER
         );"""
@@ -107,7 +107,7 @@ def walk_img_dir(db_path: str, directory: str) -> Optional[Exception]:
                         
                         print(image_data)
                         
-                        insert_sql = """INSERT INTO images (Name, Path, Http, Idx, Orientation, width, height) 
+                        insert_sql = """INSERT INTO images (Name, Path, Http, Idx, Orientation, Width, Height) 
                                        VALUES (?, ?, ?, ?, ?, ?, ?)"""
                         cursor.execute(insert_sql, (
                             image_data.name,
