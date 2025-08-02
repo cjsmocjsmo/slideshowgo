@@ -14,6 +14,8 @@ class ImageData:
     http: str
     idx: int
     orientation: str
+    width: int
+    height: int
 
 
 def img_orient(img_path: str) -> str:
@@ -27,13 +29,13 @@ def img_orient(img_path: str) -> str:
             
             if width > height:
                 print("Landscape")
-                return "landscape"
+                return width, height, "landscape"
             elif width < height:
                 print("Portrait")
-                return "portrait"
+                return width, height, "portrait"
             else:
                 print("Square")
-                return "square"
+                return width, height, "square"
     except Exception as e:
         raise Exception(f"Error processing image {img_path}: {e}")
 
@@ -53,6 +55,8 @@ def create_img_db_table(db_path: str) -> None:
             Http TEXT,
             Idx INTEGER,
             Orientation TEXT
+            Width INTEGER,
+            Height INTEGER
         );"""
         
         cursor.execute(create_table_sql)
@@ -89,26 +93,30 @@ def walk_img_dir(db_path: str, directory: str) -> Optional[Exception]:
                 
                 if ext == ".jpg":
                     try:
-                        orientation = img_orient(file_path)
+                        width, height, orientation = img_orient(file_path)
                         
                         image_data = ImageData(
                             name=file,
                             path=file_path,
                             http=create_http_path(file_path),
                             idx=idx,
-                            orientation=orientation
+                            orientation=orientation,
+                            width=width,
+                            height=height
                         )
                         
                         print(image_data)
                         
-                        insert_sql = """INSERT INTO images (Name, Path, Http, Idx, Orientation) 
-                                       VALUES (?, ?, ?, ?, ?)"""
+                        insert_sql = """INSERT INTO images (Name, Path, Http, Idx, Orientation, width, height) 
+                                       VALUES (?, ?, ?, ?, ?, ?, ?)"""
                         cursor.execute(insert_sql, (
                             image_data.name,
                             image_data.path,
                             image_data.http,
                             image_data.idx,
-                            image_data.orientation
+                            image_data.orientation,
+                            image_data.width,
+                            image_data.height,
                         ))
                         
                     except Exception as e:
