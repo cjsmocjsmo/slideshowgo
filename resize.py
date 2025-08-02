@@ -3,7 +3,6 @@
 import os
 import shutil
 from PIL import Image, ExifTags
-from PIL.ExifTags import ORIENTATION
 from pathlib import Path
 
 
@@ -38,6 +37,17 @@ def calculate_new_dimensions(width: int, height: int, max_size: int = 1500) -> t
     return new_width, new_height
 
 
+def get_orientation_tag_id():
+    """
+    Get the EXIF tag ID for orientation in a compatible way.
+    """
+    # Look for the orientation tag ID
+    for tag_id, tag_name in ExifTags.TAGS.items():
+        if tag_name == 'Orientation':
+            return tag_id
+    return 274  # Standard EXIF orientation tag ID as fallback
+
+
 def preserve_exif_orientation(img, resized_img):
     """
     Preserve EXIF orientation data in the resized image.
@@ -46,6 +56,7 @@ def preserve_exif_orientation(img, resized_img):
         # Check if image has EXIF data
         if hasattr(img, '_getexif') and img._getexif() is not None:
             exif = img._getexif()
+            orientation_tag_id = get_orientation_tag_id()
             
             # Create new EXIF dict for resized image
             exif_dict = {}
@@ -56,8 +67,8 @@ def preserve_exif_orientation(img, resized_img):
                 exif_dict[tag] = value
             
             # Ensure orientation is preserved
-            if ORIENTATION in exif:
-                orientation_value = exif[ORIENTATION]
+            if orientation_tag_id in exif:
+                orientation_value = exif[orientation_tag_id]
                 print(f"    Preserving EXIF orientation: {orientation_value}")
                 
                 # Convert EXIF dict back to bytes for saving
@@ -84,12 +95,13 @@ def process_image(source_path: str, dest_path: str, max_size: int = 1500) -> boo
             # Check for EXIF orientation
             orientation = 1  # Default orientation
             exif_data = None
+            orientation_tag_id = get_orientation_tag_id()
             
             try:
                 if hasattr(img, '_getexif') and img._getexif() is not None:
                     exif = img._getexif()
-                    if exif and ORIENTATION in exif:
-                        orientation = exif[ORIENTATION]
+                    if exif and orientation_tag_id in exif:
+                        orientation = exif[orientation_tag_id]
                         print(f"    Original EXIF orientation: {orientation}")
                 
                 # Get original EXIF data as bytes
