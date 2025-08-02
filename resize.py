@@ -2,7 +2,8 @@
 
 import os
 import shutil
-from PIL import Image
+from PIL import Image, ExifTags
+from PIL.ExifTags import ORIENTATION
 from pathlib import Path
 
 
@@ -37,9 +38,42 @@ def calculate_new_dimensions(width: int, height: int, max_size: int = 1500) -> t
     return new_width, new_height
 
 
+def preserve_exif_orientation(img, resized_img):
+    """
+    Preserve EXIF orientation data in the resized image.
+    """
+    try:
+        # Check if image has EXIF data
+        if hasattr(img, '_getexif') and img._getexif() is not None:
+            exif = img._getexif()
+            
+            # Create new EXIF dict for resized image
+            exif_dict = {}
+            
+            # Copy all EXIF data
+            for tag_id, value in exif.items():
+                tag = ExifTags.TAGS.get(tag_id, tag_id)
+                exif_dict[tag] = value
+            
+            # Ensure orientation is preserved
+            if ORIENTATION in exif:
+                orientation_value = exif[ORIENTATION]
+                print(f"    Preserving EXIF orientation: {orientation_value}")
+                
+                # Convert EXIF dict back to bytes for saving
+                exif_bytes = img.info.get('exif', b'')
+                return exif_bytes
+            
+    except Exception as e:
+        print(f"    Warning: Could not preserve EXIF data: {e}")
+        
+    return None
+
+
 def process_image(source_path: str, dest_path: str, max_size: int = 1500) -> bool:
     """
     Process a single image: resize if needed or copy if not.
+    Preserves EXIF orientation data during resize.
     Returns True if successful, False otherwise.
     """
     try:
@@ -47,28 +81,63 @@ def process_image(source_path: str, dest_path: str, max_size: int = 1500) -> boo
             original_width, original_height = img.size
             print(f"Processing: {os.path.basename(source_path)} ({original_width}x{original_height})")
             
+            # Check for EXIF orientation
+            orientation = 1  # Default orientation
+            exif_data = None
+            
+            try:
+                if hasattr(img, '_getexif') and img._getexif() is not None:
+                    exif = img._getexif()
+                    if exif and ORIENTATION in exif:
+                        orientation = exif[ORIENTATION]
+                        print(f"    Original EXIF orientation: {orientation}")
+                
+                # Get original EXIF data as bytes
+                exif_data = img.info.get('exif', b'')
+                
+            except Exception as e:
+                print(f"    Warning: Could not read EXIF data: {e}")
+            
             new_width, new_height = calculate_new_dimensions(original_width, original_height, max_size)
             
             # Ensure destination directory exists
             ensure_directory_exists(os.path.dirname(dest_path))
             
             if (new_width, new_height) == (original_width, original_height):
-                # No resize needed, copy the file
+                # No resize needed, copy the file to preserve all metadata
                 shutil.copy2(source_path, dest_path)
                 print(f"  → Copied (no resize needed)")
             else:
-                # Resize needed
+                # Resize needed - preserve orientation
                 resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
                 
-                # Preserve original format and quality
-                if img.format == 'JPEG':
-                    resized_img.save(dest_path, 'JPEG', quality=95, optimize=True)
-                elif img.format == 'PNG':
-                    resized_img.save(dest_path, 'PNG', optimize=True)
-                else:
-                    resized_img.save(dest_path)
+                # Preserve original format and quality with EXIF data
+                save_kwargs = {}
                 
-                print(f"  → Resized to {new_width}x{new_height}")
+                if img.format == 'JPEG':
+                    save_kwargs = {
+                        'format': 'JPEG',
+                        'quality': 95,
+                        'optimize': True,
+                        'exif': exif_data if exif_data else b''
+                    }
+                elif img.format == 'PNG':
+                    save_kwargs = {
+                        'format': 'PNG',
+                        'optimize': True
+                    }
+                    # PNG doesn't support EXIF, but we can preserve other metadata
+                    if hasattr(img, 'info'):
+                        save_kwargs['pnginfo'] = img.info
+                else:
+                    save_kwargs = {'format': img.format}
+                    # Try to preserve EXIF for other formats that support it
+                    if exif_data and img.format in ['TIFF', 'WebP']:
+                        save_kwargs['exif'] = exif_data
+                
+                # Save with preserved metadata
+                resized_img.save(dest_path, **save_kwargs)
+                print(f"  → Resized to {new_width}x{new_height} (orientation preserved)")
             
             return True
             
@@ -100,6 +169,7 @@ def walk_and_resize_images(source_dir: str, dest_dir: str, max_size: int = 1500)
     print(f"Source: {source_dir}")
     print(f"Destination: {dest_dir}")
     print(f"Max size: {max_size}px")
+    print("Preserving EXIF orientation data...")
     print("-" * 50)
     
     for root, dirs, files in os.walk(source_dir):
@@ -145,6 +215,7 @@ def walk_and_resize_images(source_dir: str, dest_dir: str, max_size: int = 1500)
     print(f"Images copied (no resize): {copied_count}")
     print(f"Images failed: {failed_count}")
     print(f"Destination: {dest_dir}")
+    print("EXIF orientation data preserved where possible.")
 
 
 def main():
@@ -156,8 +227,8 @@ def main():
     destination_directory = "/home/pimedia/Pictures/test"
     max_dimension = 1500
     
-    print("Image Resize and Copy Tool")
-    print("=" * 30)
+    print("Image Resize and Copy Tool with EXIF Preservation")
+    print("=" * 50)
     
     # Prompt user for source directory (optional)
     user_source = input(f"Enter source directory (default: {source_directory}): ").strip()
