@@ -9,7 +9,7 @@ services:
       # Mount the database directory (contains imagesDB)
       - /home/pimedia/go/slideshowgo:/home/pimedia/go/slideshowgo:rw
       # Mount the pictures directory (for static file serving)
-      - /home/pimedia/Pictures:/home/pimedia/Pictures/test:ro
+      - /home/pimedia/Pictures:/home/pimedia/Pictures/test2:ro
     environment:
       - TZ=America/Los_Angeles
     restart: unless-stopped
