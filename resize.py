@@ -153,7 +153,7 @@ def main():
     """
     # Configuration
     source_directory = "/home/pimedia/Pictures"  # Change this to your source directory
-    destination_directory = "/home/pimedia/Pictures/test2"
+    destination_directory = "/home/pimedia/Pictures/test"
     max_dimension = 1500
     
     print("Image Resize and Copy Tool")

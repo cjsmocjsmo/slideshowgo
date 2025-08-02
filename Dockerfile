@@ -31,7 +31,7 @@ WORKDIR /app
 # Create necessary directories and volume mount points
 RUN mkdir -p /app/templates \
     && mkdir -p /home/pimedia/go/slideshowgo \
-    && mkdir -p /home/pimedia/Pictures/test2
+    && mkdir -p /home/pimedia/Pictures/test
 
 # Copy the binary from builder stage
 COPY --from=builder /app/slideshow .
