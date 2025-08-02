@@ -223,8 +223,8 @@ def main():
     Main function to process images.
     """
     # Configuration
-    source_directory = "/home/pimedia/Pictures"  # Change this to your source directory
-    destination_directory = "/home/pimedia/Pictures/test"
+    source_directory = "/home/pimedia/Pictures/test"  # Change this to your source directory
+    destination_directory = "/home/pimedia/Pictures/test2"
     max_dimension = 1500
     
     print("Image Resize and Copy Tool with EXIF Preservation")
